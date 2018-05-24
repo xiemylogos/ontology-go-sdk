@@ -24,6 +24,14 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"math/big"
+	"math/rand"
+	"net/http"
+	"strings"
+	"sync/atomic"
+	"time"
+
 	sdkcom "github.com/ontio/ontology-go-sdk/common"
 	"github.com/ontio/ontology-go-sdk/utils"
 	"github.com/ontio/ontology/account"
@@ -36,13 +44,6 @@ import (
 	cstates "github.com/ontio/ontology/smartcontract/states"
 	vmtypes "github.com/ontio/ontology/smartcontract/types"
 	"github.com/ontio/ontology/vm/neovm"
-	"io/ioutil"
-	"math/big"
-	"math/rand"
-	"net/http"
-	"strings"
-	"sync/atomic"
-	"time"
 )
 
 func init() {
@@ -741,16 +742,17 @@ func (this *RpcClient) sendRpcRequest(method string, params []interface{}) ([]by
 }
 
 //SendEmergencyGovReq return error
-func (this *RpcClient) SendEmergencyGovReq(block []byte) (error) {
+func (this *RpcClient) SendEmergencyGovReq(block []byte) error {
 	blockString := hex.EncodeToString(block)
 	_, err := this.sendRpcRequest(SEND_EMERGENCY_GOV_REQ, []interface{}{blockString})
 	if err != nil {
-		return  fmt.Errorf("sendRpcRequest error:%s", err)
+		return fmt.Errorf("sendRpcRequest error:%s", err)
 	}
 	return nil
 }
+
 //GetGetBlockRoot return common.Uint256
-func (this *RpcClient) GetBlockRootWithNewTxRoot(txRoot common.Uint256) (common.Uint256,error) {
+func (this *RpcClient) GetBlockRootWithNewTxRoot(txRoot common.Uint256) (common.Uint256, error) {
 
 	hashString := hex.EncodeToString(txRoot.ToArray())
 	data, err := this.sendRpcRequest(GET_BLOCK_ROOT_WITH_NEW_TX_ROOT, []interface{}{hashString})
