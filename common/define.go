@@ -324,5 +324,6 @@ type TransferFromStateV2 struct {
 	TransferStateV2
 }
 
-type Uint256  common.Uint256
-var UINT256_EMPTY = common.Uint256{}
+type Uint256 common.Uint256
+
+var UINT256_EMPTY = Uint256{}

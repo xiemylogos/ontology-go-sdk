@@ -18,20 +18,6 @@
 
 package ontology_go_sdk
 
-import (
-	"encoding/base64"
-	"encoding/hex"
-	"encoding/json"
-	"fmt"
-	"strings"
-	"time"
-
-	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/signature"
-	uuid "github.com/satori/go.uuid"
-)
-
 const (
 	HEADER_TYPE = "JWT"
 )
@@ -104,6 +90,7 @@ type JWTCredential struct {
 	Jws     string   `json:"jws"`
 }
 
+/*
 func (this *Credential) CreateJWTCredential(contexts []string, types []string, credentialSubject interface{}, issuerId interface{},
 	expirationDateTimestamp int64, challenge string, domain interface{}, signer *Account) (string, error) {
 	is, ontId, err := getOntId(issuerId)
@@ -556,3 +543,4 @@ func makeJWTHeader(proofType, verificationMethod string) (*Header, error) {
 	}
 	return header, nil
 }
+*/

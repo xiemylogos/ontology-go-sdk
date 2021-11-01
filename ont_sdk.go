@@ -215,9 +215,9 @@ func ParsePayload(code []byte) (map[string]interface{}, error) {
 			res["functionName"] = "transfer"
 			res["contractAddress"] = contractAddress
 			res["param"] = param
-			if contractAddress == ONT_CONTRACT_ADDRESS {
+			if contractAddress == common.Address(ONT_CONTRACT_ADDRESS) {
 				res["asset"] = "ont"
-			} else if contractAddress == ONG_CONTRACT_ADDRESS {
+			} else if contractAddress == common.Address(ONG_CONTRACT_ADDRESS) {
 				res["asset"] = "ong"
 			}
 			return res, nil
@@ -284,9 +284,9 @@ func ParsePayload(code []byte) (map[string]interface{}, error) {
 			res["functionName"] = "transferFrom"
 			res["contractAddress"] = contractAddress
 			res["param"] = tf
-			if contractAddress == ONT_CONTRACT_ADDRESS {
+			if contractAddress == common.Address(ONT_CONTRACT_ADDRESS) {
 				res["asset"] = "ont"
-			} else if contractAddress == ONG_CONTRACT_ADDRESS {
+			} else if contractAddress == common.Address(ONG_CONTRACT_ADDRESS) {
 				res["asset"] = "ong"
 			}
 			return res, nil
@@ -377,9 +377,9 @@ func ParsePayloadV2(code []byte) (map[string]interface{}, error) {
 			res["functionName"] = "transferV2"
 			res["contractAddress"] = contractAddress
 			res["param"] = param
-			if contractAddress == ONT_CONTRACT_ADDRESS {
+			if contractAddress == common.Address(ONT_CONTRACT_ADDRESS) {
 				res["asset"] = "ont"
-			} else if contractAddress == ONG_CONTRACT_ADDRESS {
+			} else if contractAddress == common.Address(ONG_CONTRACT_ADDRESS) {
 				res["asset"] = "ong"
 			}
 			return res, nil
@@ -446,9 +446,9 @@ func ParsePayloadV2(code []byte) (map[string]interface{}, error) {
 			res["functionName"] = "transferFromV2"
 			res["contractAddress"] = contractAddress
 			res["param"] = tf
-			if contractAddress == ONT_CONTRACT_ADDRESS {
+			if contractAddress == common.Address(ONT_CONTRACT_ADDRESS) {
 				res["asset"] = "ont"
-			} else if contractAddress == ONG_CONTRACT_ADDRESS {
+			} else if contractAddress == common.Address(ONG_CONTRACT_ADDRESS) {
 				res["asset"] = "ong"
 			}
 			return res, nil
@@ -860,6 +860,6 @@ func (this *OntologySdk) GetAdddrByPubKey(pubKey keypair.PublicKey) string {
 	return address.ToBase58()
 }
 
-func (this *OntologySdk) SendTransaction(tx *types.MutableTransaction) (common.Uint256, error) {
+func (this *OntologySdk) SendTransaction(tx *types.MutableTransaction) (sdkcom.Uint256, error) {
 	return this.ClientMgr.SendTransaction(tx)
 }

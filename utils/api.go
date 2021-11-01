@@ -91,17 +91,17 @@ func GetInt(data []byte) (int, error) {
 	return integer, nil
 }
 
-func GetUint256(data []byte) (common.Uint256, error) {
+func GetUint256(data []byte) (sdkcom.Uint256, error) {
 	hexHash := ""
 	err := json.Unmarshal(data, &hexHash)
 	if err != nil {
-		return common.Uint256{}, fmt.Errorf("json.Unmarshal hash:%s error:%s", data, err)
+		return sdkcom.UINT256_EMPTY, fmt.Errorf("json.Unmarshal hash:%s error:%s", data, err)
 	}
 	hash, err := common.Uint256FromHexString(hexHash)
 	if err != nil {
-		return common.Uint256{}, fmt.Errorf("ParseUint256FromHexString:%s error:%s", data, err)
+		return sdkcom.UINT256_EMPTY, fmt.Errorf("ParseUint256FromHexString:%s error:%s", data, err)
 	}
-	return hash, nil
+	return sdkcom.Uint256(hash), nil
 }
 
 func GetTransaction(data []byte) (*types.Transaction, error) {

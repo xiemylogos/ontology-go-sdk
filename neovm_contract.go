@@ -55,15 +55,15 @@ func (this *NeoVMContract) DeployNeoVMSmartContract(
 	version,
 	author,
 	email,
-	desc string) (common.Uint256, error) {
+	desc string) (sdkcom.Uint256, error) {
 	codeBs, err := common.HexToBytes(code)
 	if err != nil {
-		return common.UINT256_EMPTY, err
+		return sdkcom.UINT256_EMPTY, err
 	}
 	tx, err := utils.NewDeployCodeTransaction(gasPrice, gasLimit, codeBs, payload.NEOVM_TYPE, name, version, author, email, desc)
 	err = this.ontSdk.SignToTransaction(tx, singer)
 	if err != nil {
-		return common.UINT256_EMPTY, err
+		return sdkcom.UINT256_EMPTY, err
 	}
 	return this.ontSdk.SendTransaction(tx)
 }
@@ -71,10 +71,10 @@ func (this *NeoVMContract) DeployNeoVMSmartContract(
 func (this *NeoVMContract) NewNeoVMInvokeTransaction(
 	gasPrice,
 	gasLimit uint64,
-	contractAddress common.Address,
+	contractAddress Address,
 	params []interface{},
 ) (*types.MutableTransaction, error) {
-	invokeCode, err := httpcom.BuildNeoVMInvokeCode(contractAddress, params)
+	invokeCode, err := httpcom.BuildNeoVMInvokeCode(common.Address(contractAddress), params)
 	if err != nil {
 		return nil, err
 	}
@@ -86,28 +86,28 @@ func (this *NeoVMContract) InvokeNeoVMContract(
 	gasLimit uint64,
 	payer,
 	signer *Account,
-	contractAddress common.Address,
-	params []interface{}) (common.Uint256, error) {
+	contractAddress Address,
+	params []interface{}) (sdkcom.Uint256, error) {
 	tx, err := this.NewNeoVMInvokeTransaction(gasPrice, gasLimit, contractAddress, params)
 	if err != nil {
-		return common.UINT256_EMPTY, fmt.Errorf("NewNeoVMInvokeTransaction error:%s", err)
+		return sdkcom.UINT256_EMPTY, fmt.Errorf("NewNeoVMInvokeTransaction error:%s", err)
 	}
 	if payer != nil {
 		this.ontSdk.SetPayer(tx, payer.Address)
 		err = this.ontSdk.SignToTransaction(tx, payer)
 		if err != nil {
-			return common.UINT256_EMPTY, err
+			return sdkcom.UINT256_EMPTY, err
 		}
 	}
 	err = this.ontSdk.SignToTransaction(tx, signer)
 	if err != nil {
-		return common.UINT256_EMPTY, err
+		return sdkcom.UINT256_EMPTY, err
 	}
 	return this.ontSdk.SendTransaction(tx)
 }
 
 func (this *NeoVMContract) PreExecInvokeNeoVMContract(
-	contractAddress common.Address,
+	contractAddress Address,
 	params []interface{}) (*sdkcom.PreExecResult, error) {
 	tx, err := this.NewNeoVMInvokeTransaction(0, 0, contractAddress, params)
 	if err != nil {

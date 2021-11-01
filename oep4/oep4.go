@@ -31,11 +31,11 @@ import (
 )
 
 type Oep4 struct {
-	ContractAddress common.Address
+	ContractAddress ontology_go_sdk.Address
 	sdk             *ontology_go_sdk.OntologySdk
 }
 
-func NewOep4(address common.Address, sdk *ontology_go_sdk.OntologySdk) *Oep4 {
+func NewOep4(address ontology_go_sdk.Address, sdk *ontology_go_sdk.OntologySdk) *Oep4 {
 	return &Oep4{
 		ContractAddress: address,
 		sdk:             sdk,
@@ -87,31 +87,31 @@ func (this *Oep4) BalanceOf(account common.Address) (*big.Int, error) {
 	return preResult.Result.ToInteger()
 }
 
-func (this *Oep4) Transfer(from *ontology_go_sdk.Account, to common.Address, amount *big.Int, payer *ontology_go_sdk.Account, gasPrice,
-	gasLimit uint64) (common.Uint256, error) {
+func (this *Oep4) Transfer(from *ontology_go_sdk.Account, to ontology_go_sdk.Address, amount *big.Int, payer *ontology_go_sdk.Account, gasPrice,
+	gasLimit uint64) (scomm.Uint256, error) {
 	return this.sdk.NeoVM.InvokeNeoVMContract(gasPrice, gasLimit, payer, from, this.ContractAddress,
 		[]interface{}{"transfer", []interface{}{from.Address, to, amount}})
 }
 
-func (this *Oep4) MultiSignTransfer(fromAccounts []*ontology_go_sdk.Account, m int, to common.Address, amount *big.Int,
-	gasPrice, gasLimit uint64) (common.Uint256, error) {
+func (this *Oep4) MultiSignTransfer(fromAccounts []*ontology_go_sdk.Account, m int, to ontology_go_sdk.Address, amount *big.Int,
+	gasPrice, gasLimit uint64) (scomm.Uint256, error) {
 	pubKeys := make([]keypair.PublicKey, 0)
 	for _, acc := range fromAccounts {
 		pubKeys = append(pubKeys, acc.PublicKey)
 	}
 	fromAddr, err := types.AddressFromMultiPubKeys(pubKeys, m)
 	if err != nil {
-		return common.UINT256_EMPTY, fmt.Errorf("generate multi-sign address failed, err: %s", err)
+		return scomm.UINT256_EMPTY, fmt.Errorf("generate multi-sign address failed, err: %s", err)
 	}
 	mutableTx, err := this.sdk.NeoVM.NewNeoVMInvokeTransaction(gasPrice, gasLimit, this.ContractAddress,
 		[]interface{}{"transfer", []interface{}{fromAddr, to, amount}})
 	if err != nil {
-		return common.UINT256_EMPTY, fmt.Errorf("construct tx failed, err: %s", err)
+		return scomm.UINT256_EMPTY, fmt.Errorf("construct tx failed, err: %s", err)
 	}
 	for _, signer := range fromAccounts {
 		err = this.sdk.MultiSignToTransaction(mutableTx, uint16(m), pubKeys, signer)
 		if err != nil {
-			return common.UINT256_EMPTY, fmt.Errorf("multi sign failed, err: %s", err)
+			return scomm.UINT256_EMPTY, fmt.Errorf("multi sign failed, err: %s", err)
 		}
 	}
 	return this.sdk.SendTransaction(mutableTx)
@@ -119,9 +119,9 @@ func (this *Oep4) MultiSignTransfer(fromAccounts []*ontology_go_sdk.Account, m i
 
 // there are no plan to support multi sign of TransferMulti
 func (this *Oep4) TransferMulti(fromAccounts []*ontology_go_sdk.Account, to []common.Address, amount []*big.Int,
-	gasPrice, gasLimit uint64) (common.Uint256, error) {
+	gasPrice, gasLimit uint64) (scomm.Uint256, error) {
 	if len(fromAccounts) != len(to) || len(fromAccounts) != len(amount) || len(to) != len(amount) {
-		return common.UINT256_EMPTY, fmt.Errorf("param invalid")
+		return scomm.UINT256_EMPTY, fmt.Errorf("param invalid")
 	}
 	args := make([]*State, 0)
 	for i, from := range fromAccounts {
@@ -134,72 +134,72 @@ func (this *Oep4) TransferMulti(fromAccounts []*ontology_go_sdk.Account, to []co
 	mutableTx, err := this.sdk.NeoVM.NewNeoVMInvokeTransaction(gasPrice, gasLimit, this.ContractAddress,
 		[]interface{}{"transferMulti", []interface{}{args}})
 	if err != nil {
-		return common.UINT256_EMPTY, fmt.Errorf("construct tx failed, err: %s", err)
+		return scomm.UINT256_EMPTY, fmt.Errorf("construct tx failed, err: %s", err)
 	}
 	for _, signer := range fromAccounts {
 		err = this.sdk.SignToTransaction(mutableTx, signer)
 		if err != nil {
-			return common.UINT256_EMPTY, fmt.Errorf("sign tx failed, err: %s", err)
+			return scomm.UINT256_EMPTY, fmt.Errorf("sign tx failed, err: %s", err)
 		}
 	}
 	return this.sdk.SendTransaction(mutableTx)
 }
 
-func (this *Oep4) Approve(owner *ontology_go_sdk.Account, spender common.Address, amount *big.Int, payer *ontology_go_sdk.Account, gasPrice,
-	gasLimit uint64) (common.Uint256, error) {
+func (this *Oep4) Approve(owner *ontology_go_sdk.Account, spender ontology_go_sdk.Address, amount *big.Int, payer *ontology_go_sdk.Account, gasPrice,
+	gasLimit uint64) (scomm.Uint256, error) {
 	return this.sdk.NeoVM.InvokeNeoVMContract(gasPrice, gasLimit, payer, owner, this.ContractAddress,
 		[]interface{}{"approve", []interface{}{owner.Address, spender, amount}})
 }
 
 func (this *Oep4) MultiSignApprove(ownerAccounts []*ontology_go_sdk.Account, m int, spender common.Address,
-	amount *big.Int, gasPrice, gasLimit uint64) (common.Uint256, error) {
+	amount *big.Int, gasPrice, gasLimit uint64) (scomm.Uint256, error) {
 	pubKeys := make([]keypair.PublicKey, 0)
 	for _, acc := range ownerAccounts {
 		pubKeys = append(pubKeys, acc.PublicKey)
 	}
 	owner, err := types.AddressFromMultiPubKeys(pubKeys, m)
 	if err != nil {
-		return common.UINT256_EMPTY, fmt.Errorf("generate multi-sign address failed, err: %s", err)
+		return scomm.UINT256_EMPTY, fmt.Errorf("generate multi-sign address failed, err: %s", err)
 	}
 	mutableTx, err := this.sdk.NeoVM.NewNeoVMInvokeTransaction(gasPrice, gasLimit, this.ContractAddress,
 		[]interface{}{"approve", []interface{}{owner, spender, amount}})
 	if err != nil {
-		return common.UINT256_EMPTY, fmt.Errorf("construct tx failed, err: %s", err)
+		return scomm.UINT256_EMPTY, fmt.Errorf("construct tx failed, err: %s", err)
 	}
 	for _, signer := range ownerAccounts {
 		err = this.sdk.MultiSignToTransaction(mutableTx, uint16(m), pubKeys, signer)
 		if err != nil {
-			return common.UINT256_EMPTY, fmt.Errorf("multi sign failed, err: %s", err)
+			return scomm.UINT256_EMPTY, fmt.Errorf("multi sign failed, err: %s", err)
 		}
 	}
 	return this.sdk.SendTransaction(mutableTx)
 }
 
 func (this *Oep4) TransferFrom(spender *ontology_go_sdk.Account, from, to common.Address, amount *big.Int, payer *ontology_go_sdk.Account, gasPrice,
-	gasLimit uint64) (common.Uint256, error) {
+	gasLimit uint64) (scomm.Uint256, error) {
 	return this.sdk.NeoVM.InvokeNeoVMContract(gasPrice, gasLimit, payer, spender, this.ContractAddress,
 		[]interface{}{"transferFrom", []interface{}{spender.Address, from, to, amount}})
 }
 
 func (this *Oep4) MultiSignTransferFrom(spenders []*ontology_go_sdk.Account, m int, from, to common.Address,
-	amount *big.Int, gasPrice, gasLimit uint64) (common.Uint256, error) {
+	amount *big.Int, gasPrice, gasLimit uint64) (scomm.Uint256, error) {
 	pubKeys := make([]keypair.PublicKey, 0)
 	for _, acc := range spenders {
 		pubKeys = append(pubKeys, acc.PublicKey)
 	}
 	spender, err := types.AddressFromMultiPubKeys(pubKeys, m)
 	if err != nil {
-		return common.UINT256_EMPTY, fmt.Errorf("generate multi-sign address failed, err: %s", err)
+		return scomm.UINT256_EMPTY, fmt.Errorf("generate multi-sign address failed, err: %s", err)
 	}
 	mutableTx, err := this.sdk.NeoVM.NewNeoVMInvokeTransaction(gasPrice, gasLimit, this.ContractAddress,
 		[]interface{}{"approve", []interface{}{spender, from, to, amount}})
 	if err != nil {
-		return common.UINT256_EMPTY, fmt.Errorf("construct tx failed, err: %s", err)
+		return scomm.UINT256_EMPTY, fmt.Errorf("construct tx failed, err: %s", err)
 	}
 	for _, signer := range spenders {
 		err = this.sdk.MultiSignToTransaction(mutableTx, uint16(m), pubKeys, signer)
 		if err != nil {
-			return common.UINT256_EMPTY, fmt.Errorf("multi sign failed, err: %s", err)
+			return scomm.UINT256_EMPTY, fmt.Errorf("multi sign failed, err: %s", err)
 		}
 	}
 	return this.sdk.SendTransaction(mutableTx)
@@ -231,7 +231,7 @@ func (this *Oep4) parseTransferEvent(contractEvt *scomm.SmartContactEvent) []*Oe
 	result := make([]*Oep4TransferEvent, 0)
 	for _, notify := range contractEvt.Notify {
 		addr, _ := utils.AddressFromHexString(notify.ContractAddress)
-		if addr == this.ContractAddress {
+		if addr == common.Address(this.ContractAddress) {
 			selfEvt, err := parseOep4TransferEvent(notify)
 			if err == nil {
 				result = append(result, selfEvt)

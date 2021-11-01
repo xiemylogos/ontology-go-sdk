@@ -19,17 +19,7 @@
 package ontology_go_sdk
 
 import (
-	"encoding/hex"
-	"encoding/json"
-	"fmt"
-	"reflect"
-	"strings"
-	"time"
-
-	"github.com/ontio/ontology-crypto/keypair"
 	"github.com/ontio/ontology/common"
-	"github.com/ontio/ontology/core/signature"
-	uuid "github.com/satori/go.uuid"
 )
 
 const (
@@ -107,6 +97,7 @@ func newCredential(ontSdk *OntologySdk) *Credential {
 	}
 }
 
+/*
 func (this *Credential) GenSignReq(credentialSubject interface{}, ontId string, signer *Account) (*Request, error) {
 	request := &Request{
 		CredentialSubject: credentialSubject,
@@ -271,7 +262,7 @@ func (this *Credential) CommitCredential(contractAddress common.Address, gasPric
 	return txHash, nil
 }
 
-func (this *Credential) revokeCredential(contractAddress common.Address, gasPrice, gasLimit uint64, credentialId, ontId string, index uint32,
+func (this *Credential) revokeCredential(contractAddress Address, gasPrice, gasLimit uint64, credentialId, ontId string, index uint32,
 	signer, payer *Account) (common.Uint256, error) {
 	params := []interface{}{"Revoke", []interface{}{credentialId, ontId, index}}
 	txHash, err := this.ontSdk.NeoVM.InvokeNeoVMContract(gasPrice, gasLimit, payer, signer, contractAddress, params)
@@ -711,3 +702,5 @@ func GenPresentationMsg(presentation *VerifiablePresentation) ([]byte, error) {
 	}
 	return msg, nil
 }
+
+*/
