@@ -323,3 +323,6 @@ type TransferFromStateV2 struct {
 	Sender common.Address
 	TransferStateV2
 }
+
+type Uint256  common.Uint256
+var UINT256_EMPTY = common.Uint256{}

@@ -21,6 +21,7 @@ import (
 	"crypto/elliptic"
 	"encoding/hex"
 	"fmt"
+	"github.com/ontio/ontology/common"
 
 	"github.com/ontio/ontology-crypto/ec"
 	"github.com/ontio/ontology-crypto/keypair"
@@ -37,6 +38,7 @@ type Signer interface {
 }
 
 type Account account.Account
+type Address common.Address
 
 func NewAccountFromPrivateKey(privateKey []byte, signatureScheme s.SignatureScheme) (*Account, error) {
 	if privateKey == nil {

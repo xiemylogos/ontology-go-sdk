@@ -122,3 +122,7 @@ func PubKeysEqual(pks1, pks2 []keypair.PublicKey) bool {
 	}
 	return true
 }
+
+func Verify(pk keypair.PublicKey, data, sig []byte) error {
+	return signature.Verify(pk, data, sig)
+}
