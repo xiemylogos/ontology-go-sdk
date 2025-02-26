@@ -1,0 +1,139 @@
+package ontology_go_sdk
+
+import (
+	"io/ioutil"
+	"math/big"
+	"testing"
+	"time"
+
+	"github.com/ontio/ontology-go-sdk/utils"
+	"github.com/ontio/ontology/common"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestDeployWasmContract(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
+	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
+	assert.Nil(t, err)
+	wasmfile := "./token.wasm"
+	code, err := ioutil.ReadFile(wasmfile)
+	assert.Nil(t, err)
+	codeHash := common.ToHexString(code)
+	gasprice := uint64(2500)
+	//invokegaslimit := uint64(200000)
+	t.Logf("signer addr:%s", testDefAcc.Address.ToBase58())
+	deploygaslimit := uint64(200000000)
+	txHash, err := testOntSdk.WasmVM.DeployWasmVMSmartContract(
+		gasprice,
+		deploygaslimit,
+		testDefAcc,
+		codeHash,
+		"OEP4 token",
+		"1.0",
+		"author",
+		"email",
+		"desc",
+	)
+	assert.Nil(t, err)
+	timeout := 60 * time.Second
+	_, err = testOntSdk.WaitForGenerateBlock(timeout)
+	assert.Nil(t, err)
+	t.Logf("deploy wasm contract txhash is %s", txHash.ToHexString())
+	contractAddr, err := utils.GetContractAddress(codeHash)
+	assert.Nil(t, err)
+	t.Logf("the contractAddr is:%s", contractAddr.ToHexString())
+}
+
+func TestWasmContractAddr(t *testing.T) {
+	wasmfile := "./token.wasm"
+	code, err := ioutil.ReadFile(wasmfile)
+	assert.Nil(t, err)
+	codeHash := common.ToHexString(code)
+	contractAddr, err := utils.GetContractAddress(codeHash)
+	assert.Nil(t, err)
+	t.Logf("the contractAddr is:%s", contractAddr.ToHexString())
+}
+func TestInitWasmContract(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
+	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
+	assert.Nil(t, err)
+	gasprice := uint64(2500)
+	invokegaslimit := uint64(200000)
+	contractAddr, err := common.AddressFromHexString("f1fb556f9eb49bbc379aaef3aac59ccc53420832")
+	assert.Nil(t, err)
+	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
+		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "init", []interface{}{})
+	assert.Nil(t, err)
+	t.Logf("txHash:%s", txHash.ToHexString())
+}
+
+func TestGetInfoWasmContract(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
+	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
+	assert.Nil(t, err)
+	gasprice := uint64(2500)
+	invokegaslimit := uint64(200000)
+	contractAddr, err := common.AddressFromHexString("f1fb556f9eb49bbc379aaef3aac59ccc53420832")
+	assert.Nil(t, err)
+	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
+		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "getInfo", []interface{}{})
+	assert.Nil(t, err)
+	t.Logf("txHash:%s", txHash.ToHexString())
+}
+
+func TestSetParamsWasmContract(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
+	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
+	assert.Nil(t, err)
+	gasprice := uint64(2500)
+	invokegaslimit := uint64(200000)
+	contractAddr, err := common.AddressFromHexString("f1fb556f9eb49bbc379aaef3aac59ccc53420832")
+	assert.Nil(t, err)
+	/*
+		txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
+			gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "name", []interface{}{})
+		assert.Nil(t, err)
+		t.Logf("txHash:%s",txHash.ToHexString())
+
+		time.Sleep(20*time.Second);
+		txHashSymbol, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
+			gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "symbol", []interface{}{})
+		assert.Nil(t, err)
+		t.Logf("txHash:%s",txHashSymbol.ToHexString())
+
+		time.Sleep(20*time.Second);
+	*/
+	txHashTotoal, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
+		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "totalSupply", []interface{}{})
+	assert.Nil(t, err)
+	t.Logf("txHash:%s", txHashTotoal.ToHexString())
+
+}
+
+func TestTransferWasmContract(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
+	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
+	assert.Nil(t, err)
+	gasprice := uint64(2500)
+	invokegaslimit := uint64(200000)
+	contractAddr, err := common.AddressFromHexString("f1fb556f9eb49bbc379aaef3aac59ccc53420832")
+	assert.Nil(t, err)
+	fromAddr := testDefAcc.Address
+	toAddr, err := common.AddressFromBase58("AVrvzC1Uax1QRTvNxkUDFZyC3AdCm7U9Un")
+	assert.Nil(t, err)
+	amount := big.NewInt(800000000000)
+	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
+		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "transfer", []interface{}{fromAddr, toAddr, amount})
+	assert.Nil(t, err)
+	t.Logf("txHash:%s", txHash.ToHexString())
+}
