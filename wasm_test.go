@@ -49,13 +49,14 @@ func TestDeployWasmContract(t *testing.T) {
 }
 
 func TestWasmContractAddr(t *testing.T) {
-	wasmfile := "./token.wasm"
+	wasmfile := "./oep4bridge.wasm"
 	code, err := ioutil.ReadFile(wasmfile)
 	assert.Nil(t, err)
 	codeHash := common.ToHexString(code)
 	contractAddr, err := utils.GetContractAddress(codeHash)
 	assert.Nil(t, err)
 	t.Logf("the contractAddr is:%s", contractAddr.ToHexString())
+	t.Logf("the base58 contractAddr is:%s",contractAddr.ToBase58())
 }
 func TestInitWasmContract(t *testing.T) {
 	testOntSdk = NewOntologySdk()
@@ -67,7 +68,7 @@ func TestInitWasmContract(t *testing.T) {
 	invokegaslimit := uint64(200000)
 //	contractAddr, err := common.AddressFromHexString("b8c3d8d19edf354b6e3fd83bfc6e043099120ef3") //ope4token
 	//contractAddr, err := common.AddressFromHexString("f1fb556f9eb49bbc379aaef3aac59ccc53420832") //ope4token
-	contractAddr, err := common.AddressFromHexString("5dab6bde204ffd80b20d1c94c8f9ade50b45ab7e") //bridge
+	contractAddr, err := common.AddressFromHexString("9ad27daff8f40728cbbfd2a5b239bc4062676a08") //bridge
 	assert.Nil(t, err)
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
 		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "init", []interface{}{})
@@ -167,11 +168,11 @@ func TestLockBridgeWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	contractAddr, err := common.AddressFromHexString("5dab6bde204ffd80b20d1c94c8f9ade50b45ab7e") //wasmoep4 bridge
+	contractAddr, err := common.AddressFromHexString("9ad27daff8f40728cbbfd2a5b239bc4062676a08") //wasmoep4 bridge
 	assert.Nil(t, err)
 	fromAddr := testDefAcc.Address
 	assert.Nil(t, err)
-	amount := big.NewInt(60000000000)
+	amount := big.NewInt(80000000000)
 	validChain := "Ethereum"
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
 		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "lock", []interface{}{fromAddr, validChain, amount})
