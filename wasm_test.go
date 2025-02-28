@@ -68,7 +68,7 @@ func TestInitWasmContract(t *testing.T) {
 	invokegaslimit := uint64(200000)
 //	contractAddr, err := common.AddressFromHexString("b8c3d8d19edf354b6e3fd83bfc6e043099120ef3") //ope4token
 	//contractAddr, err := common.AddressFromHexString("f1fb556f9eb49bbc379aaef3aac59ccc53420832") //ope4token
-	contractAddr, err := common.AddressFromHexString("9ad27daff8f40728cbbfd2a5b239bc4062676a08") //bridge
+	contractAddr, err := common.AddressFromHexString("2540152ac7f1e586ac8f2903d5159e4061d3fd66") //oep4bridge
 	assert.Nil(t, err)
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
 		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "init", []interface{}{})
@@ -168,11 +168,11 @@ func TestLockBridgeWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	contractAddr, err := common.AddressFromHexString("9ad27daff8f40728cbbfd2a5b239bc4062676a08") //wasmoep4 bridge
+	contractAddr, err := common.AddressFromHexString("2540152ac7f1e586ac8f2903d5159e4061d3fd66") //wasmoep4 bridge
 	assert.Nil(t, err)
 	fromAddr := testDefAcc.Address
 	assert.Nil(t, err)
-	amount := big.NewInt(80000000000)
+	amount := big.NewInt(8000000)
 	validChain := "Ethereum"
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
 		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "lock", []interface{}{fromAddr, validChain, amount})
@@ -188,10 +188,10 @@ func TestPauseBridgeWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	contractAddr, err := common.AddressFromHexString("32acc7f4f99744930fbfa6f55f5fcb83db912ce7") //wasmoep4 bridge
+	contractAddr, err := common.AddressFromHexString("2540152ac7f1e586ac8f2903d5159e4061d3fd66") //wasmoep4 bridge
 	assert.Nil(t, err)
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
-		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "pause", []interface{}{})
+		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "unpause", []interface{}{})
 	assert.Nil(t, err)
 	t.Logf("txHash:%s", txHash.ToHexString())
 }
@@ -222,14 +222,30 @@ func TestCrossContractTransferWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	contractAddr, err := common.AddressFromHexString("1c948a68552011a474d1fb661ce0ae6e604d3dc8")
+	contractAddr, err := common.AddressFromHexString("d6dfe924b8abd59b0cb4ffcfbc8fe83025bdb867")
 	assert.Nil(t, err)
 	fromAddr := testDefAcc.Address
 	toAddr, err := common.AddressFromBase58("AVrvzC1Uax1QRTvNxkUDFZyC3AdCm7U9Un")
 	assert.Nil(t, err)
-	amount := big.NewInt(800000000000)
+	amount := big.NewInt(80000)
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
 		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "callOep4Transfer", []interface{}{fromAddr, toAddr, amount})
+	assert.Nil(t, err)
+	t.Logf("txHash:%s", txHash.ToHexString())
+}
+
+func TestPauseCrossContractWasmContract(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
+	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
+	assert.Nil(t, err)
+	gasprice := uint64(2500)
+	invokegaslimit := uint64(200000)
+	contractAddr, err := common.AddressFromHexString("7a67ffaf4cffc15f0b281ab9b5e56773f5038993") //wasmoep4 bridge
+	assert.Nil(t, err)
+	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
+		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "pause", []interface{}{})
 	assert.Nil(t, err)
 	t.Logf("txHash:%s", txHash.ToHexString())
 }
