@@ -20,7 +20,8 @@ func TestDeployWasmContract(t *testing.T) {
 	//wasmfile := "./oep4token.wasm"  //ope4token
 	//wasmfile := "./oep4bridge.wasm"
 	//wasmfile := "./crosscontract.wasm"
-	wasmfile := "./nativebridge.wasm"
+	//wasmfile := "./nativebridge.wasm"
+	wasmfile := "./proxybridge.wasm"
 	code, err := ioutil.ReadFile(wasmfile)
 	assert.Nil(t, err)
 	codeHash := common.ToHexString(code)
@@ -33,7 +34,7 @@ func TestDeployWasmContract(t *testing.T) {
 		deploygaslimit,
 		testDefAcc,
 		codeHash,
-		"wasmoep4bridge",
+		"wasmproxybridge",
 		"1.0",
 		"author",
 		"email",
@@ -269,6 +270,63 @@ func TestLockNativeBridgeWasmContract(t *testing.T) {
 	validChain := "Ethereum"
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
 		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "lock", []interface{}{nativeContract, fromAddr, validChain, amount})
+	assert.Nil(t, err)
+	t.Logf("txHash:%s", txHash.ToHexString())
+}
+//setLogicContract
+func TestSetProxyBridgeWasmContract(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
+	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
+	assert.Nil(t, err)
+	gasprice := uint64(2500)
+	invokegaslimit := uint64(200000)
+	proxyContractAddr, err := common.AddressFromHexString("eff285c52f3d5fe7867b0c5c79924f28ab8efc6a") //proxy bridge
+	assert.Nil(t, err)
+	implContractAddr, err := common.AddressFromHexString("e89c93487fd5faf8cac30c90eddcdad73a5ff3ce") //proxy bridge
+	assert.Nil(t, err)
+	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
+		gasprice, invokegaslimit, nil, testDefAcc, proxyContractAddr, "setLogicContract", []interface{}{implContractAddr})
+	assert.Nil(t, err)
+	t.Logf("txHash:%s", txHash.ToHexString())
+}
+
+//getLogicContract
+func TestGetProxyBridgeWasmContract(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
+	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
+	assert.Nil(t, err)
+	gasprice := uint64(2500)
+	invokegaslimit := uint64(200000)
+	proxyContractAddr, err := common.AddressFromHexString("eff285c52f3d5fe7867b0c5c79924f28ab8efc6a") //proxy bridge
+	assert.Nil(t, err)
+	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
+		gasprice, invokegaslimit, nil, testDefAcc, proxyContractAddr, "getLogicContract", []interface{}{})
+	assert.Nil(t, err)
+	t.Logf("txHash:%s", txHash.ToHexString())
+}
+
+func TestFromProxyBridgeCallLockNativeBridgeWasmContract(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
+	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
+	assert.Nil(t, err)
+	gasprice := uint64(2500)
+	invokegaslimit := uint64(200000)
+	proxyContractAddr, err := common.AddressFromHexString("eff285c52f3d5fe7867b0c5c79924f28ab8efc6a") //native bridge
+	assert.Nil(t, err)
+	nativeContract, err := common.AddressFromBase58("AFmseVrdL9f9oyCzZefL9tG6UbvhfRZMHJ") //define ONG contract addr
+	assert.Nil(t, err)
+	fromAddr := testDefAcc.Address
+	assert.Nil(t, err)
+	amount := big.NewInt(660)
+	validChain := "Ethereum"
+	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
+		gasprice, invokegaslimit, nil, testDefAcc, proxyContractAddr, "lock", []interface{}{"lock",nativeContract, fromAddr, validChain, amount})
 	assert.Nil(t, err)
 	t.Logf("txHash:%s", txHash.ToHexString())
 }
