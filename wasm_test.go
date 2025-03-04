@@ -282,9 +282,9 @@ func TestSetProxyBridgeWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	proxyContractAddr, err := common.AddressFromHexString("eff285c52f3d5fe7867b0c5c79924f28ab8efc6a") //proxy bridge
+	proxyContractAddr, err := common.AddressFromHexString("6d0e0deb199edbae1106145295fa67cfe0b2bc4b") //proxy bridge
 	assert.Nil(t, err)
-	implContractAddr, err := common.AddressFromHexString("e89c93487fd5faf8cac30c90eddcdad73a5ff3ce") //proxy bridge
+	implContractAddr, err := common.AddressFromHexString("e89c93487fd5faf8cac30c90eddcdad73a5ff3ce") //impl bridge
 	assert.Nil(t, err)
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
 		gasprice, invokegaslimit, nil, testDefAcc, proxyContractAddr, "setLogicContract", []interface{}{implContractAddr})
@@ -301,7 +301,7 @@ func TestGetProxyBridgeWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	proxyContractAddr, err := common.AddressFromHexString("eff285c52f3d5fe7867b0c5c79924f28ab8efc6a") //proxy bridge
+	proxyContractAddr, err := common.AddressFromHexString("6d0e0deb199edbae1106145295fa67cfe0b2bc4b") //proxy bridge
 	assert.Nil(t, err)
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
 		gasprice, invokegaslimit, nil, testDefAcc, proxyContractAddr, "getLogicContract", []interface{}{})
@@ -317,7 +317,7 @@ func TestFromProxyBridgeCallLockNativeBridgeWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	proxyContractAddr, err := common.AddressFromHexString("eff285c52f3d5fe7867b0c5c79924f28ab8efc6a") //native bridge
+	proxyContractAddr, err := common.AddressFromHexString("6d0e0deb199edbae1106145295fa67cfe0b2bc4b") //native bridge
 	assert.Nil(t, err)
 	nativeContract, err := common.AddressFromBase58("AFmseVrdL9f9oyCzZefL9tG6UbvhfRZMHJ") //define ONG contract addr
 	assert.Nil(t, err)
@@ -326,7 +326,7 @@ func TestFromProxyBridgeCallLockNativeBridgeWasmContract(t *testing.T) {
 	amount := big.NewInt(660)
 	validChain := "Ethereum"
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
-		gasprice, invokegaslimit, nil, testDefAcc, proxyContractAddr, "lock", []interface{}{"lock",nativeContract, fromAddr, validChain, amount})
+		gasprice, invokegaslimit, nil, testDefAcc, proxyContractAddr, "call", []interface{}{"lock",nativeContract, fromAddr, validChain, amount})
 	assert.Nil(t, err)
 	t.Logf("txHash:%s", txHash.ToHexString())
 }

@@ -46,7 +46,8 @@ var (
 	testDefAcc   *Account
 	testGasPrice = uint64(2500)
 	testGasLimit = uint64(20000)
-	testNetUrl   = "http://127.0.0.1:20336"
+	//testNetUrl   = "http://127.0.0.1:20336"
+	testNetUrl   = "http://testnet1.ont.io:40336"
 )
 
 func init() {
