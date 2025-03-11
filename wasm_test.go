@@ -1,6 +1,10 @@
 package ontology_go_sdk
 
 import (
+	"encoding/hex"
+	"encoding/json"
+	"github.com/ontio/ontology-crypto/keypair"
+	"github.com/ontio/ontology/core/types"
 	"io/ioutil"
 	"math/big"
 	"testing"
@@ -10,6 +14,39 @@ import (
 	"github.com/ontio/ontology/common"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestRegisterDid(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
+	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
+	assert.Nil(t, err)
+	did := "did:ont:"+testDefAcc.Address.ToBase58()
+	txhash, err := testOntSdk.Native.OntId.RegIDWithPublicKey(testGasPrice, testGasLimit, testDefAcc,did, testDefAcc)
+	assert.Nil(t, err)
+	t.Logf("txHash:%s",txhash.ToHexString())
+}
+
+func TestGetPubKeyByDid(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	did := "did:ont:ALefsBqE3JCdDjatuaJuxWxDh8fUnHyDWC"
+	publicKeys, err := testOntSdk.Native.OntId.GetPublicKeysJson(did)
+	assert.Nil(t, err)
+	var publicKeyList PublicKeyList
+	err = json.Unmarshal(publicKeys, &publicKeyList)
+	assert.Nil(t, err)
+	for _,pkInfo := range publicKeyList {
+		data, err := hex.DecodeString(pkInfo.PublicKeyHex)
+		assert.Nil(t, err)
+		pk, err := keypair.DeserializePublicKey(data)
+		assert.Nil(t, err)
+		pkBytes := keypair.SerializePublicKey(pk)
+		t.Logf("pkBytes data:%s", hex.EncodeToString(pkBytes))
+		address := types.AddressFromPubKey(pk)
+		t.Logf("address:%s", address.ToBase58())
+	}
+}
 
 func TestDeployWasmContract(t *testing.T) {
 	testOntSdk = NewOntologySdk()
