@@ -3,12 +3,13 @@ package ontology_go_sdk
 import (
 	"encoding/hex"
 	"encoding/json"
-	"github.com/ontio/ontology-crypto/keypair"
-	"github.com/ontio/ontology/core/types"
 	"io/ioutil"
 	"math/big"
 	"testing"
 	"time"
+
+	"github.com/ontio/ontology-crypto/keypair"
+	"github.com/ontio/ontology/core/types"
 
 	"github.com/ontio/ontology-go-sdk/utils"
 	"github.com/ontio/ontology/common"
@@ -21,10 +22,10 @@ func TestRegisterDid(t *testing.T) {
 	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
 	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
 	assert.Nil(t, err)
-	did := "did:ont:"+testDefAcc.Address.ToBase58()
-	txhash, err := testOntSdk.Native.OntId.RegIDWithPublicKey(testGasPrice, testGasLimit, testDefAcc,did, testDefAcc)
+	did := "did:ont:" + testDefAcc.Address.ToBase58()
+	txhash, err := testOntSdk.Native.OntId.RegIDWithPublicKey(testGasPrice, testGasLimit, testDefAcc, did, testDefAcc)
 	assert.Nil(t, err)
-	t.Logf("txHash:%s",txhash.ToHexString())
+	t.Logf("txHash:%s", txhash.ToHexString())
 }
 
 func TestGetPubKeyByDid(t *testing.T) {
@@ -36,7 +37,7 @@ func TestGetPubKeyByDid(t *testing.T) {
 	var publicKeyList PublicKeyList
 	err = json.Unmarshal(publicKeys, &publicKeyList)
 	assert.Nil(t, err)
-	for _,pkInfo := range publicKeyList {
+	for _, pkInfo := range publicKeyList {
 		data, err := hex.DecodeString(pkInfo.PublicKeyHex)
 		assert.Nil(t, err)
 		pk, err := keypair.DeserializePublicKey(data)
@@ -310,6 +311,7 @@ func TestLockNativeBridgeWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	t.Logf("txHash:%s", txHash.ToHexString())
 }
+
 //setLogicContract
 func TestSetProxyBridgeWasmContract(t *testing.T) {
 	testOntSdk = NewOntologySdk()
@@ -363,11 +365,10 @@ func TestFromProxyBridgeCallLockNativeBridgeWasmContract(t *testing.T) {
 	amount := big.NewInt(660)
 	validChain := "Ethereum"
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
-		gasprice, invokegaslimit, nil, testDefAcc, proxyContractAddr, "call", []interface{}{"lock",nativeContract, fromAddr, validChain, amount})
+		gasprice, invokegaslimit, nil, testDefAcc, proxyContractAddr, "call", []interface{}{"lock", nativeContract, fromAddr, validChain, amount})
 	assert.Nil(t, err)
 	t.Logf("txHash:%s", txHash.ToHexString())
 }
-
 
 func TestDeployEnsWasmContract(t *testing.T) {
 	testOntSdk = NewOntologySdk()
@@ -416,7 +417,7 @@ func TestInitEnsWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	contractAddr, err := common.AddressFromHexString("13249e916aa666bcefef3cd5c6813e785c8d5369") //oep4bridge
+	contractAddr, err := common.AddressFromHexString("da16dfe6923d5bf0460d9b322045fb470b3e2b72") //ont ens contract
 	assert.Nil(t, err)
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
 		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "init", []interface{}{})
@@ -432,13 +433,13 @@ func TestRegisterEnsWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	ensContractAddr, err := common.AddressFromHexString("13249e916aa666bcefef3cd5c6813e785c8d5369") //proxy bridge
+	ensContractAddr, err := common.AddressFromHexString("da16dfe6923d5bf0460d9b322045fb470b3e2b72") //ont contract addr
 	assert.Nil(t, err)
 	ensName := "alice.ont.io"
-	owner, err := common.AddressFromBase58("ALefsBqE3JCdDjatuaJuxWxDh8fUnHyDWC") //define ONG contract addr
+	owner, err := common.AddressFromBase58("ALefsBqE3JCdDjatuaJuxWxDh8fUnHyDWC")
 	assert.Nil(t, err)
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
-		gasprice, invokegaslimit, nil, testDefAcc, ensContractAddr, "register", []interface{}{ensName,owner})
+		gasprice, invokegaslimit, nil, testDefAcc, ensContractAddr, "register", []interface{}{ensName, owner})
 	assert.Nil(t, err)
 	t.Logf("txHash:%s", txHash.ToHexString())
 }
@@ -446,18 +447,29 @@ func TestRegisterEnsWasmContract(t *testing.T) {
 func TestResolveEnsWasmContract(t *testing.T) {
 	testOntSdk = NewOntologySdk()
 	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
-	ensContractAddr, err := common.AddressFromHexString("13249e916aa666bcefef3cd5c6813e785c8d5369") //proxy bridge
+	ensContractAddr, err := common.AddressFromHexString("da16dfe6923d5bf0460d9b322045fb470b3e2b72") //ont ens contract
 	assert.Nil(t, err)
 	ensName := "alice.ont.io"
 	res, err := testOntSdk.WasmVM.PreExecInvokeWasmVMContract(ensContractAddr, "resolve", []interface{}{ensName})
 	assert.Nil(t, err)
-	bs,err := res.Result.ToByteArray()
+	bs, err := res.Result.ToByteArray()
 	assert.Nil(t, err)
-	t.Logf("resolve addr:%v",bs)
-	t.Logf("len:%d",len(bs))
-	/*
-	addr,err := common.AddressParseFromBytes(bs)
+	addr, err := common.AddressParseFromBytes(bs)
 	assert.Nil(t, err)
-	t.Logf("addr:%s",addr.ToBase58())
-	 */
+	t.Logf("resolve addr:%s", addr.ToBase58())
+}
+
+func TestGetOwnerEnsWasmContract(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	ensContractAddr, err := common.AddressFromHexString("da16dfe6923d5bf0460d9b322045fb470b3e2b72") //ont ens contract
+	assert.Nil(t, err)
+	res, err := testOntSdk.WasmVM.PreExecInvokeWasmVMContract(ensContractAddr, "getOwner", []interface{}{})
+	assert.Nil(t, err)
+	t.Logf("res:%v", res)
+	bs, err := res.Result.ToByteArray()
+	assert.Nil(t, err)
+	addr, err := common.AddressParseFromBytes(bs)
+	assert.Nil(t, err)
+	t.Logf("addr:%s", addr.ToBase58())
 }
