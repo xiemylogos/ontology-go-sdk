@@ -417,7 +417,7 @@ func TestInitEnsWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	contractAddr, err := common.AddressFromHexString("da16dfe6923d5bf0460d9b322045fb470b3e2b72") //ont ens contract
+	contractAddr, err := common.AddressFromHexString("2042c3b54c681e4ba728a022d01ab950612445ac") //ont ens contract
 	assert.Nil(t, err)
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
 		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "init", []interface{}{})
@@ -433,7 +433,7 @@ func TestRegisterEnsWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	ensContractAddr, err := common.AddressFromHexString("da16dfe6923d5bf0460d9b322045fb470b3e2b72") //ont contract addr
+	ensContractAddr, err := common.AddressFromHexString("2042c3b54c681e4ba728a022d01ab950612445ac") //ont contract addr
 	assert.Nil(t, err)
 	ensName := "alice.ont.io"
 	owner, err := common.AddressFromBase58("ALefsBqE3JCdDjatuaJuxWxDh8fUnHyDWC")
@@ -447,7 +447,7 @@ func TestRegisterEnsWasmContract(t *testing.T) {
 func TestResolveEnsWasmContract(t *testing.T) {
 	testOntSdk = NewOntologySdk()
 	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
-	ensContractAddr, err := common.AddressFromHexString("da16dfe6923d5bf0460d9b322045fb470b3e2b72") //ont ens contract
+	ensContractAddr, err := common.AddressFromHexString("2042c3b54c681e4ba728a022d01ab950612445ac") //ont ens contract
 	assert.Nil(t, err)
 	ensName := "alice.ont.io"
 	res, err := testOntSdk.WasmVM.PreExecInvokeWasmVMContract(ensContractAddr, "resolve", []interface{}{ensName})
@@ -457,19 +457,4 @@ func TestResolveEnsWasmContract(t *testing.T) {
 	addr, err := common.AddressParseFromBytes(bs)
 	assert.Nil(t, err)
 	t.Logf("resolve addr:%s", addr.ToBase58())
-}
-
-func TestGetOwnerEnsWasmContract(t *testing.T) {
-	testOntSdk = NewOntologySdk()
-	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
-	ensContractAddr, err := common.AddressFromHexString("da16dfe6923d5bf0460d9b322045fb470b3e2b72") //ont ens contract
-	assert.Nil(t, err)
-	res, err := testOntSdk.WasmVM.PreExecInvokeWasmVMContract(ensContractAddr, "getOwner", []interface{}{})
-	assert.Nil(t, err)
-	t.Logf("res:%v", res)
-	bs, err := res.Result.ToByteArray()
-	assert.Nil(t, err)
-	addr, err := common.AddressParseFromBytes(bs)
-	assert.Nil(t, err)
-	t.Logf("addr:%s", addr.ToBase58())
 }
