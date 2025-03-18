@@ -3,6 +3,14 @@ package ontology_go_sdk
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	ethcomm "github.com/ethereum/go-ethereum/common"
+	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/ontio/ontology/common/constants"
+	txtypes "github.com/ontio/ontology/core/types"
+
 	"io/ioutil"
 	"math/big"
 	"testing"
@@ -457,4 +465,76 @@ func TestResolveEnsWasmContract(t *testing.T) {
 	addr, err := common.AddressParseFromBytes(bs)
 	assert.Nil(t, err)
 	t.Logf("resolve addr:%s", addr.ToBase58())
+}
+
+func TestBuildEipTx(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
+	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
+	assert.Nil(t, err)
+	value := big.NewInt(1000000000)
+	gaslimit := uint64(21000)
+	gasPrice := big.NewInt(2500 * constants.GWei)
+	toAddress := ethcomm.HexToAddress("0x4592d8f8d7b001e72cb26a73e4fa1806a51ac79d")
+	var data []byte
+	nonce := uint64(0)
+	tx := ethtypes.NewTransaction(nonce, toAddress, value, gaslimit, gasPrice, data)
+	chainId := big.NewInt(int64(5851))
+	priKeyBytes := keypair.SerializePrivateKey(testDefAcc.PrivateKey)
+	t.Logf("len:%d",len(priKeyBytes))
+	if len(priKeyBytes) != 67 {
+		t.Fatalf("Unexpected private key length: %d", len(priKeyBytes))
+		return
+	}
+	privKeyD := priKeyBytes[1:33] // 跳过 1 字节类型标记，取 32 字节 D
+	privKeyECDSA, err := crypto.ToECDSA(privKeyD)
+	assert.Nil(t, err)
+	signer := ethtypes.NewEIP155Signer(chainId)
+	signedTx, err := ethtypes.SignTx(tx, signer, privKeyECDSA)
+	assert.Nil(t, err)
+	bts, _ := rlp.EncodeToBytes(signedTx)
+	fmt.Printf("rlp:0x%s\n", hex.EncodeToString(bts))
+	otx, err := txtypes.TransactionFromEIP155(signedTx)
+	assert.Nil(t, err)
+	t.Logf("tx hash:%s",otx.Hash().ToHexString())
+
+	sender, err := signer.Sender(signedTx)
+	assert.Nil(t, err)
+	t.Logf("Recovered sender address: %s", sender.Hex())
+
+	expectedAddr := crypto.PubkeyToAddress(privKeyECDSA.PublicKey)
+	t.Logf("Expected address: %s", expectedAddr.Hex())
+
+	if sender != expectedAddr {
+		t.Fatalf("Signature verification failed: sender %s != expected %s", sender.Hex(), expectedAddr.Hex())
+	}
+	t.Logf("Signature verification passed: sender matches expected address")
+
+	txHash := signer.Hash(signedTx)
+	t.Logf("Transaction hash: %x", txHash)
+
+	var parsedTx struct {
+		Nonce    uint64
+		GasPrice *big.Int
+		GasLimit uint64
+		To       common.Address
+		Value    *big.Int
+		Data     []byte
+		V        *big.Int
+		R, S     *big.Int
+	}
+	err = rlp.DecodeBytes(bts, &parsedTx)
+	assert.Nil(t, err)
+
+	t.Logf("Parsed signature values: v=%d, r=%x, s=%x", parsedTx.V, parsedTx.R, parsedTx.S)
+
+	sig := append(ethcomm.LeftPadBytes(parsedTx.R.Bytes(), 32), ethcomm.LeftPadBytes(parsedTx.S.Bytes(), 32)...)
+
+	pubKeyBytes := crypto.FromECDSAPub(&privKeyECDSA.PublicKey)
+	if !crypto.VerifySignature(pubKeyBytes, txHash[:], sig) {
+		t.Fatalf("Manual signature verification failed")
+	}
+	t.Logf("Manual signature verification passed")
+
 }
