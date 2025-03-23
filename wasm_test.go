@@ -323,7 +323,7 @@ func TestLockNativeBridgeWasmContract(t *testing.T) {
 	t.Logf("txHash:%s", txHash.ToHexString())
 }
 
-//setLogicContract
+// setLogicContract
 func TestSetProxyBridgeWasmContract(t *testing.T) {
 	testOntSdk = NewOntologySdk()
 	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
@@ -342,7 +342,7 @@ func TestSetProxyBridgeWasmContract(t *testing.T) {
 	t.Logf("txHash:%s", txHash.ToHexString())
 }
 
-//getLogicContract
+// getLogicContract
 func TestGetProxyBridgeWasmContract(t *testing.T) {
 	testOntSdk = NewOntologySdk()
 	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
