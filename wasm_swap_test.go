@@ -54,7 +54,7 @@ func TestInitSwapWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	contractAddr, err := common.AddressFromHexString("1b0e5b4f0793e0494f043c5c20b3e56853b1892b") //uniswapv2
+	contractAddr, err := common.AddressFromHexString("23ca1178c817efadd4bb605744a7c7dd618fc100") //uniswapv2
 	assert.Nil(t, err)
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
 		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "init", []interface{}{})
@@ -70,7 +70,7 @@ func TestPauseSwapWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	contractAddr, err := common.AddressFromHexString("1b0e5b4f0793e0494f043c5c20b3e56853b1892b") //wasmoep4 bridge
+	contractAddr, err := common.AddressFromHexString("23ca1178c817efadd4bb605744a7c7dd618fc100") //wasmoep4 bridge
 	assert.Nil(t, err)
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
 		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "pause", []interface{}{})
@@ -86,7 +86,7 @@ func TestApproveSwapWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	contractAddr, err := common.AddressFromHexString("1b0e5b4f0793e0494f043c5c20b3e56853b1892b") //wasm uniswap v2
+	contractAddr, err := common.AddressFromHexString("23ca1178c817efadd4bb605744a7c7dd618fc100") //wasm uniswap v2
 	assert.Nil(t, err)
 	evmUniswapAddr, err := common.AddressFromHexString("12cfe671e9b186f21d9852d69bdbfe3f8ac9ecb1") //evm swap contract
 	assert.Nil(t, err)
@@ -94,7 +94,7 @@ func TestApproveSwapWasmContract(t *testing.T) {
 	wong, err := common.AddressFromHexString("197239029febc9158bd65e46d6509175832da6a5") //wong contract
 	assert.Nil(t, err)
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
-		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "approve", []interface{}{wong, evmUniswapAddr, amount})
+		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "approve", []interface{}{testDefAcc.Address,wong, evmUniswapAddr, amount})
 	assert.Nil(t, err)
 	t.Logf("txHash:%s", txHash.ToHexString())
 }
@@ -107,7 +107,7 @@ func TestBalanceOfSwapWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	contractAddr, err := common.AddressFromHexString("1b0e5b4f0793e0494f043c5c20b3e56853b1892b") //wasm uniswap v2
+	contractAddr, err := common.AddressFromHexString("23ca1178c817efadd4bb605744a7c7dd618fc100") //wasm uniswap v2
 	assert.Nil(t, err)
 	//wont, err := common.AddressFromHexString("4ce5619038209524f14477008d770f0bb1283c19") //wont contract
 	//assert.Nil(t, err)
@@ -116,7 +116,7 @@ func TestBalanceOfSwapWasmContract(t *testing.T) {
 	user, err := common.AddressFromHexString("357be1f9e1c98b83f1ca1e363b79743019936d0f")
 	assert.Nil(t, err)
 	tx, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
-		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "balanceOf", []interface{}{wong[:], user})
+		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "balanceOf", []interface{}{wong[:], user[:]})
 	assert.Nil(t, err)
 	t.Logf("txHash:%s", tx.ToHexString())
 }
@@ -124,12 +124,12 @@ func TestBalanceOfSwapWasmContract(t *testing.T) {
 func TestGetTxEvent(t *testing.T) {
 	testOntSdk = NewOntologySdk()
 	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
-	contractAddr, err := common.AddressFromHexString("1b0e5b4f0793e0494f043c5c20b3e56853b1892b") //wasm uniswap v2
+	contractAddr, err := common.AddressFromHexString("23ca1178c817efadd4bb605744a7c7dd618fc100") //wasm uniswap v2
 	assert.Nil(t, err)
 	user, err := common.AddressFromHexString("357be1f9e1c98b83f1ca1e363b79743019936d0f")
 	assert.Nil(t, err)
 	//txHash := "69ee725996c514e1d4d89763a4513bd317a6fd0b2ad524c58494b7dfa952e152" //ont balanceOf
-	txHash := "3fd3f642e140c75dae220db868d827a06b61a68eeef096366926db887927103e"
+	txHash := "01a8b7a2bd5021a16aea3dc50105ee686a24db5f27a1e469bf5285dc96546822"
 	event, err := testOntSdk.GetSmartContractEvent(txHash)
 	assert.Nil(t, err)
 	t.Logf("event:%v", event)
@@ -160,7 +160,7 @@ func TestRegisterTokenPairSwapWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	contractAddr, err := common.AddressFromHexString("1b0e5b4f0793e0494f043c5c20b3e56853b1892b") //wasm uniswap v2
+	contractAddr, err := common.AddressFromHexString("23ca1178c817efadd4bb605744a7c7dd618fc100") //wasm uniswap v2
 	assert.Nil(t, err)
 	evmUniswapAddr, err := common.AddressFromHexString("12cfe671e9b186f21d9852d69bdbfe3f8ac9ecb1") //evm swap contract
 	assert.Nil(t, err)
@@ -183,7 +183,7 @@ func TestUnRegisterTokenPairSwapWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	contractAddr, err := common.AddressFromHexString("1b0e5b4f0793e0494f043c5c20b3e56853b1892b") //wasm uniswap
+	contractAddr, err := common.AddressFromHexString("23ca1178c817efadd4bb605744a7c7dd618fc100") //wasm uniswap
 	assert.Nil(t, err)
 	tokenPairName := "ONG_TO_WONT"
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
@@ -201,7 +201,7 @@ type SwapTokenPair struct {
 func TestGeTokenPairSwapWasmContract(t *testing.T) {
 	testOntSdk = NewOntologySdk()
 	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
-	contractAddr, err := common.AddressFromHexString("1b0e5b4f0793e0494f043c5c20b3e56853b1892b") //wasm uniswapv2
+	contractAddr, err := common.AddressFromHexString("23ca1178c817efadd4bb605744a7c7dd618fc100") //wasm uniswapv2
 	assert.Nil(t, err)
 	tokenPairName := "ONG_TO_WONT"
 	res, err := testOntSdk.WasmVM.PreExecInvokeWasmVMContract(
@@ -226,7 +226,7 @@ func TestGeTokenPairSwapWasmContract(t *testing.T) {
 func TestGetAllTokenPairSwapWasmContract(t *testing.T) {
 	testOntSdk = NewOntologySdk()
 	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
-	contractAddr, err := common.AddressFromHexString("1b0e5b4f0793e0494f043c5c20b3e56853b1892b") //wasm uniswap
+	contractAddr, err := common.AddressFromHexString("23ca1178c817efadd4bb605744a7c7dd618fc100") //wasm uniswap
 	assert.Nil(t, err)
 	res, err := testOntSdk.WasmVM.PreExecInvokeWasmVMContract(
 		contractAddr, "getAllTokenPairName", []interface{}{})
@@ -261,7 +261,7 @@ func TestSwapExactTokensForTokensSwapWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	contractAddr, err := common.AddressFromHexString("1b0e5b4f0793e0494f043c5c20b3e56853b1892b") //wasm uniswap v2
+	contractAddr, err := common.AddressFromHexString("23ca1178c817efadd4bb605744a7c7dd618fc100") //wasm uniswap v2
 	assert.Nil(t, err)
 	tokenPairName := "ONG_TO_WONT"
 	wong, err := common.AddressFromHexString("197239029febc9158bd65e46d6509175832da6a5")
