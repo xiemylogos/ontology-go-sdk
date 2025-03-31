@@ -346,11 +346,8 @@ func TestGetAmountsOutWasmContract(t *testing.T) {
 			tokenPairName,
 			amountIn})
 	assert.Nil(t, err)
-	t.Logf("PreExec result (full): %+v", res)
 	bs, err := res.Result.ToByteArray()
 	assert.Nil(t, err)
-	t.Logf("Raw bytes (hex): %x", bs)
-	t.Logf("Raw bytes length: %d", len(bs))
 	result, err := parseEvmUintArrayInfo(bs)
 	assert.Nil(t, err)
 	for _, u128 := range result {
