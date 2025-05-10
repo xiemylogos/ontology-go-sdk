@@ -16,7 +16,7 @@ func TestDeploySwapGatewayWasmContract(t *testing.T) {
 	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
 	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
 	assert.Nil(t, err)
-	wasmfile := "./uniswapv2gateway.wasm"
+	wasmfile := "./wasm_file/uniswapv2gateway.wasm"
 	//wasmfile := "./bridge.wasm"
 	code, err := ioutil.ReadFile(wasmfile)
 	assert.Nil(t, err)
