@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io/ioutil"
+	"math/big"
 	"testing"
 	"time"
 
@@ -40,7 +41,7 @@ func TestDeployBridgeWasmContract(t *testing.T) {
 		"desc",
 	)
 	assert.Nil(t, err)
-	timeout := 20 * time.Second
+	timeout := 10 * time.Second
 	_, err = testOntSdk.WaitForGenerateBlock(timeout)
 	assert.Nil(t, err)
 	t.Logf("deploy wasm contract txhash is %s", txHash.ToHexString())
@@ -58,7 +59,7 @@ func TestInitBridgeWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	contractAddr, err := common.AddressFromHexString("816c02c3d1b30fb10d1bb493d8e4d2af5731449c") //uniswapv2gatway
+	contractAddr, err := common.AddressFromHexString("b09746c446d87e218f0cf04dfe51db0aa977bc72") //wasm bridge
 	assert.Nil(t, err)
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
 		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "init", []interface{}{testDefAcc.Address})
@@ -126,11 +127,11 @@ func TestBridgeRegisterOtherOep4Erc20TokenPair(t *testing.T) {
 	t.Logf("txHash:%s", txHash.ToHexString())
 }
 
-//GetAllTokenPair
+// GetAllTokenPair
 func TestGetAllTokenBridgeFromWasmContract(t *testing.T) {
 	testOntSdk = NewOntologySdk()
 	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
-	contractAddr, err := common.AddressFromHexString("816c02c3d1b30fb10d1bb493d8e4d2af5731449c") //wasm bridge testnet
+	contractAddr, err := common.AddressFromHexString("0c5ea3898e9a5a32335818e322eed98cfe266b44") //wasm bridge testnet
 	assert.Nil(t, err)
 	res, err := testOntSdk.WasmVM.PreExecInvokeWasmVMContract(
 		contractAddr, "getAllTokenPairName", []interface{}{})
@@ -157,14 +158,16 @@ func TestGetAllTokenBridgeFromWasmContract(t *testing.T) {
 
 }
 
-//getTokenPairInfo
+// getTokenPairInfo
 func TestGetTokenPairFromWasmBridgeContract(t *testing.T) {
 	testOntSdk = NewOntologySdk()
 	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
-	contractAddr, err := common.AddressFromHexString("816c02c3d1b30fb10d1bb493d8e4d2af5731449c") //wasm uniswapv2
+	contractAddr, err := common.AddressFromHexString("0c5ea3898e9a5a32335818e322eed98cfe266b44") //wasm uniswapv2
 	assert.Nil(t, err)
 	//tokenPairName := "MKT-MKT"
-	tokenPairName := "MKR-MKR"
+	//tokenPairName := "MKR-MKR"
+	tokenPairName := "MYT-MYT"
+	//tokenPairName := "ONT-WONT"
 	res, err := testOntSdk.WasmVM.PreExecInvokeWasmVMContract(
 		contractAddr, "getTokenPair", []interface{}{tokenPairName})
 	assert.Nil(t, err)
@@ -204,4 +207,111 @@ func parseTokenPairInfo(rawResult []byte) (*TokenPairInfo, error) {
 	tokenPairInfo.Oep4Address = oep4Address.ToHexString()
 	tokenPairInfo.Oep4Decimals = binary.LittleEndian.Uint32(rawResult[44:48])
 	return tokenPairInfo, nil
+}
+
+func TestBridgeRegisterNeoVmMYTTokenPair(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
+	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
+	assert.Nil(t, err)
+	gasprice := uint64(2500)
+	invokegaslimit := uint64(200000)
+	contractAddr, err := common.AddressFromHexString("b09746c446d87e218f0cf04dfe51db0aa977bc72") //bridge contract
+	assert.Nil(t, err)
+	//https://explorer.ont.io/testnet/contract/other/19ed155fd0adf1d598af054068538d41a3a192ff/10/1
+	oep4TokenAddr, err := common.AddressFromHexString("19ed155fd0adf1d598af054068538d41a3a192ff") //neovm oep4 token contract
+	assert.Nil(t, err)
+	oep4Decimals := 18
+	erc20TokenAddr, err := common.AddressFromHexString("a7b848e1c02a927d65dd2746debd1a9c9898a48c") //erc20 token contract:0x8ca498989c1abdde4627dd657d922ac0e148b8a7
+	assert.Nil(t, err)
+	erc20Decimals := 18
+	tokenPairName := "MYT-MYT"
+	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
+		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "registerTokenPair",
+		[]interface{}{
+			tokenPairName,
+			oep4TokenAddr,
+			oep4Decimals,
+			erc20TokenAddr,
+			erc20Decimals,
+		})
+	assert.Nil(t, err)
+	t.Logf("txHash:%s", txHash.ToHexString())
+}
+
+func TestBridgeRegisterOntErc20TokenPair(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
+	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
+	assert.Nil(t, err)
+	gasprice := uint64(2500)
+	invokegaslimit := uint64(200000)
+	contractAddr, err := common.AddressFromHexString("b09746c446d87e218f0cf04dfe51db0aa977bc72") //bridge contract
+	assert.Nil(t, err)
+	//https://explorer.ont.io/testnet/contract/other/0100000000000000000000000000000000000000/10/1
+	oep4TokenAddr, err := common.AddressFromHexString("0100000000000000000000000000000000000000") //oep4 token contract
+	assert.Nil(t, err)
+	oep4Decimals := 9
+	//wont
+	//https://explorer.ont.io/testnet/contract/orc20/0x4ce5619038209524f14477008d770f0bb1283c19/10/1
+	erc20TokenAddr, err := common.AddressFromHexString("193c28b10b0f778d007744f1249520389061e54c") //erc20 wont token contract:0x4ce5619038209524f14477008d770f0bb1283c19
+	assert.Nil(t, err)
+	erc20Decimals := 9
+	tokenPairName := "ONT-WONT"
+	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
+		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "registerTokenPair",
+		[]interface{}{
+			tokenPairName,
+			oep4TokenAddr,
+			oep4Decimals,
+			erc20TokenAddr,
+			erc20Decimals,
+		})
+	assert.Nil(t, err)
+	t.Logf("txHash:%s", txHash.ToHexString())
+}
+
+func TestGetBalanceWasmBridgeContract(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	contractAddr, err := common.AddressFromHexString("b09746c446d87e218f0cf04dfe51db0aa977bc72") //wasm bridge contract address
+	assert.Nil(t, err)
+	oep4ContractAddr, err := common.AddressFromHexString("19ed155fd0adf1d598af054068538d41a3a192ff")
+	assert.Nil(t, err)
+	res, err := testOntSdk.WasmVM.PreExecInvokeWasmVMContract(
+		contractAddr, "balanceOf", []interface{}{oep4ContractAddr, contractAddr})
+	assert.Nil(t, err)
+	t.Logf("PreExec result (full): %+v", res)
+	bs, err := res.Result.ToByteArray()
+	assert.Nil(t, err)
+	t.Logf("balance:%v", binary.LittleEndian.Uint64(bs))
+}
+
+func TestTransferWasmBridgeContract(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
+	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
+	assert.Nil(t, err)
+	gasprice := uint64(2500)
+	invokegaslimit := uint64(200000)
+	contractAddr, err := common.AddressFromHexString("b09746c446d87e218f0cf04dfe51db0aa977bc72") //wasm bridge contract
+	assert.Nil(t, err)
+	oep4ContractAddr, err := common.AddressFromHexString("19ed155fd0adf1d598af054068538d41a3a192ff")
+	assert.Nil(t, err)
+	amount := big.NewInt(1)
+	toAddr, err := common.AddressFromBase58("AcvHRs4SVqBh5dNnusakmUTu6uUCpfdZRt")
+	assert.Nil(t, err)
+	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
+		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "transfer",
+		[]interface{}{
+			testDefAcc.Address,
+			toAddr,
+			amount,
+			oep4ContractAddr,
+		})
+	assert.Nil(t, err)
+	t.Logf("txHash:%s", txHash.ToHexString())
 }
