@@ -69,7 +69,7 @@ func TestDeployWasmContract(t *testing.T) {
 	//wasmfile := "./crosscontract.wasm"
 	//wasmfile := "./nativebridge.wasm"
 	//wasmfile := "./proxybridge.wasm"
-	wasmfile := "./uniswapv2.wasm"
+	wasmfile := "./wasm_file/uniswapv2.wasm"
 	code, err := ioutil.ReadFile(wasmfile)
 	assert.Nil(t, err)
 	codeHash := common.ToHexString(code)

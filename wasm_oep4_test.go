@@ -55,7 +55,7 @@ func TestInitOep4TokenWasmContract(t *testing.T) {
 	assert.Nil(t, err)
 	gasprice := uint64(2500)
 	invokegaslimit := uint64(200000)
-	contractAddr, err := common.AddressFromHexString("22757e9ceb405f2d3b3d8a8a656aa7b1f8c68534") //oep4token
+	contractAddr, err := common.AddressFromHexString("97e32e59b0af10ea8575bab82ed8156f47c91a06") //oep4token
 	assert.Nil(t, err)
 	txHash, err := testOntSdk.WasmVM.InvokeWasmVMSmartContract(
 		gasprice, invokegaslimit, nil, testDefAcc, contractAddr, "init", []interface{}{testDefAcc.Address})
