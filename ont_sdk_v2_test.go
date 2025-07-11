@@ -18,9 +18,16 @@
 package ontology_go_sdk
 
 import (
+	"crypto/elliptic"
+	"encoding/hex"
+	"fmt"
 	"math/big"
 	"testing"
 	"time"
+
+	"github.com/ontio/ontology-crypto/keypair"
+	"github.com/ontio/ontology-crypto/signature"
+	"github.com/ontio/ontology/core/types"
 
 	"github.com/ontio/ontology/common"
 	"github.com/ontio/ontology/common/constants"
@@ -136,10 +143,11 @@ func TestOng_TransferV2(t *testing.T) {
 	}
 }
 
+// send ong tx test
 func TestOng_Transfer(t *testing.T) {
 	testOntSdk = NewOntologySdk()
 	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
-	testWallet, _ = testOntSdk.OpenWallet("./wallet.dat")
+	testWallet, _ = testOntSdk.OpenWallet("./testconsens.dat")
 	testDefAcc, err := testWallet.GetDefaultAccount(testPasswd)
 	assert.Nil(t, err)
 	addr, err := common.AddressFromBase58("AWRBh9yYVzYHAfAb3tuWtdKjwGxNubimPo")
@@ -229,7 +237,90 @@ func TestOng_NewTransferFromTransactionV2(t *testing.T) {
 	assert.Nil(t, err)
 	ontTx, err := mutableTransaction.IntoImmutable()
 	assert.Nil(t, err)
+	t.Logf("rawHex:%s", hex.EncodeToString(ontTx.Raw))
 	res, err := ParseNativeTxPayloadV2(ontTx.ToArray())
 	assert.Nil(t, err)
 	t.Logf("res:%v", res)
+}
+
+// send ong tx test
+func TestOngLegdgerV2_Transfer(t *testing.T) {
+	testOntSdk = NewOntologySdk()
+	testOntSdk.NewRpcClient().SetAddress(testNetUrl)
+	txData := "00d1526aebfac409000000000000204e00000000000035eac618f06ed688813467cdfa1b3ed1aedf76397b00c66b1435eac618f06ed688813467cdfa1b3ed1aedf76396a7cc8141243502e7243c889181add5bc16a32bbc1e068356a7cc8080080e03779c311006a7cc86c51c10a7472616e7366657256321400000000000000000000000000000000000000020068164f6e746f6c6f67792e4e61746976652e496e766f6b650000"
+	mutableTx, err := testOntSdk.GetMutableTx(txData)
+	/*
+		res,err := json.MarshalIndent(mutableTx,""," ")
+		assert.Nil(t, err)
+		t.Logf("%v",string(res))
+	*/
+	t.Logf("tx type:%d", mutableTx.TxType)
+	t.Logf("tx payer:%s", mutableTx.Payer.ToBase58())
+	assert.Nil(t, err)
+	derSigData := "3045022100943f0841e849a0ca12e46b3d73469e45caa2c16517f41758bf3563c9f085412302200282de53f8384bc0db6926c523a3471a19fbfe08ac5256ad9adb5fab837cfe1c"
+	r, s, err := ParseDerSig(derSigData)
+	assert.Nil(t, err)
+	sig := &signature.Signature{
+		Scheme: signature.SHA256withECDSA,
+		Value: &signature.DSASignature{
+			R:     r,
+			S:     s,
+			Curve: elliptic.P256(),
+		},
+	}
+	sigData, err := signature.Serialize(sig)
+	assert.Nil(t, err)
+	pub := "04c7f99c0f1cd9d37bec54c612d14de2474bf65e41e9724e77f3809a68d92c75f9513033e2813f5c1f5ea31d3fac7446a50ec8939ec9ea717cf3080fa29177e59a"
+	pubKey, err := hex.DecodeString(pub)
+	assert.Nil(t, err)
+	pk, err := keypair.DeserializePublicKey(pubKey)
+	assert.Nil(t, err)
+	pkBytes := keypair.SerializePublicKey(pk)
+	t.Logf("pub:%s", pub)
+	t.Logf("pkBytes data:%s", hex.EncodeToString(pkBytes))
+	//sigBytes,err := hex.DecodeString("")
+	mutableTx.Sigs = append(mutableTx.Sigs, types.Sig{
+		SigData: [][]byte{sigData},
+		PubKeys: []keypair.PublicKey{pk},
+		M:       1,
+	})
+	sendTx, err := testOntSdk.GetTxData(mutableTx)
+	assert.Nil(t, err)
+	t.Logf("sendTx:%s", sendTx)
+	txHash, err := testOntSdk.SendTransaction(mutableTx)
+	assert.Nil(t, err)
+	t.Logf("hash:%v", txHash.ToHexString())
+}
+
+func ParseDerSig(derSigData string) (*big.Int, *big.Int, error) {
+	derSig, _ := hex.DecodeString(derSigData)
+	r := new(big.Int)
+	s := new(big.Int)
+	offset := 2
+	if derSig[offset] != 0x02 {
+		return nil, nil, fmt.Errorf("Invalid R integer marker")
+	}
+	offset++
+	rLen := int(derSig[offset])
+	offset++
+	r.SetBytes(derSig[offset : offset+rLen])
+	offset += rLen
+	if derSig[offset] != 0x02 {
+		return nil, nil, fmt.Errorf("Invalid S integer marker")
+	}
+	offset++
+	sLen := int(derSig[offset])
+	offset++
+	s.SetBytes(derSig[offset : offset+sLen])
+	return r, s, nil
+}
+
+func TestPubkeyToAddr(t *testing.T) {
+	pub := "0253719ac66d7cafa1fe49a64f73bd864a346da92d908c19577a003a8a4160b7fa"
+	pubKey, err := hex.DecodeString(pub)
+	assert.Nil(t, err)
+	pk, err := keypair.DeserializePublicKey(pubKey)
+	assert.Nil(t, err)
+	address := types.AddressFromPubKey(pk)
+	t.Logf("address:%s", address.ToBase58())
 }
